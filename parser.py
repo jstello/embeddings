@@ -15,8 +15,30 @@ TERMINALS = """
     V -> "smiled" | "tell" | "were"
     """
 
-NONTERMINALS = """
-    S -> N V
+
+# Holmes lit a pipe.
+
+# S -> NP VP
+# NP -> N
+
+# lit -> V
+# a -> D
+# pipe -> N
+
+# VP -> V D NP 
+# We arrived the day before yesterday
+# S -> NP VP
+# VP: arrived the day before yesterday
+# ADVP: the day before yesterday (adverbial phrase)
+
+
+NONTERMINALS = """ 
+    S -> NP VP | NP VP Conj VP | NP ADVP
+    NP -> N | Det NP | AP NP | N PP | Det NP | 
+    VP -> V | V NP | V NP PP | V PP | V Det NP | VP ADVP | NP VP
+    AP -> Adj | Adj AP
+    ADVP -> NP PP | P NP | A VP
+    PP -> P NP  
 """
 
 grammar = nltk.CFG.fromstring(NONTERMINALS + TERMINALS)
@@ -83,7 +105,18 @@ def np_chunk(tree):
     whose label is "NP" that does not itself contain any other
     noun phrases as subtrees.
     """
-    raise NotImplementedError
+    noun_phrase_chunks = []
+    
+    subtrees = tree.subtrees()
+    
+    # Subtrees that are labeled as NP
+    subtrees_np = [subtree for subtree in subtrees if subtree.label() == "NP"] 
+    
+    
+    # Subtrees that are labeled as NP and do not contain any other NP as a subtree
+    noun_phrase_chunks = [st for st in subtrees_np if not any(st in st2 for st2 in subtrees_np if st2 != st)]
+    
+    return noun_phrase_chunks
 
 
 if __name__ == "__main__":
