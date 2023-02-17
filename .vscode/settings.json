@@ -1,0 +1,4 @@
+{
+    "python.analysis.extraPaths" : ["C:\\Users\\jstel\\Anaconda3\\envs\\nlp\\lib\\site-packages"],
+    "python.autoComplete.extraPaths" : ["C:\\Users\\jstel\\Anaconda3\\envs\\nlp\\lib\\site-packages\\nltk"]
+}
