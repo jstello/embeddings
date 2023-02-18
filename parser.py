@@ -16,29 +16,15 @@ TERMINALS = """
     """
 
 
-# Holmes lit a pipe.
-
-# S -> NP VP
-# NP -> N
-
-# lit -> V
-# a -> D
-# pipe -> N
-
-# VP -> V D NP 
-# We arrived the day before yesterday
-# S -> NP VP
-# VP: arrived the day before yesterday
-# ADVP: the day before yesterday (adverbial phrase)
-
-
 NONTERMINALS = """ 
     S -> NP VP | NP VP Conj VP | NP ADVP
-    NP -> N | Det NP | AP NP | N PP | Det NP | 
-    VP -> V | V NP | V NP PP | V PP | V Det NP | VP ADVP | NP VP
+    NP -> N | Det NP | AP NP | N PP | Det NP | Adv Det N | Det NP Conj NP
+    VP -> Adv V PP | V | V NP | V NP PP | V PP | V Det NP | VP ADVP | NP VP
     AP -> Adj | Adj AP
-    ADVP -> NP PP | P NP | A VP
-    PP -> P NP  
+    ADVP -> NP PP | P NP | A VP | Adv VP | VP Adv | VP ADVP | ADVP ADVP | P NP P
+    PP -> P NP | P VP
+    PP -> P NP Adv
+    VP -> VP Conj VP
 """
 
 grammar = nltk.CFG.fromstring(NONTERMINALS + TERMINALS)
