@@ -11,7 +11,7 @@
             "program": "${file}",
             "console": "integratedTerminal",
             "justMyCode": false,
-            "args": ["sentences/8.txt"],
+            "args": ["sentences/10.txt"],
 
         }
     ]

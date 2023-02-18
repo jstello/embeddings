@@ -16,16 +16,32 @@ TERMINALS = """
     """
 
 
-NONTERMINALS = """ 
-    S -> NP VP | NP VP Conj VP | NP ADVP
-    NP -> N | Det NP | AP NP | N PP | Det NP | Adv Det N | Det NP Conj NP
-    VP -> Adv V PP | V | V NP | V NP PP | V PP | V Det NP | VP ADVP | NP VP
-    AP -> Adj | Adj AP
-    ADVP -> NP PP | P NP | A VP | Adv VP | VP Adv | VP ADVP | ADVP ADVP | P NP P
-    PP -> P NP | P VP
-    PP -> P NP Adv
-    VP -> VP Conj VP
+NONTERMINALS = \
+\
+    """ # Sentences/8.txt
+S -> NP VP Conj VP
+VP -> V NP | V Adv | V Det N | V Det NP
+NP -> N | Det N | N Det 
+# """ 
+
+NONTERMINALS += """ # Sentences/9.txt
+S -> N VP Conj VP
+VP -> V | V NP | VP PP | V Adv | NP Adv VP | NP VP Adv  | V Det NP | N VP | V PP
+PP -> P | P NP
+NP -> N | NP PP | Det Adj N
+    """
+
+NONTERMINALS += """ 
+S -> NP VP
+S -> NP Adv VP  Conj VP Adv  
 """
+
+NONTERMINALS += """ 
+S -> VP Conj VP
+VP -> Det NP
+NP -> Det Adj Adj Adj N
+"""
+
 
 grammar = nltk.CFG.fromstring(NONTERMINALS + TERMINALS)
 parser = nltk.ChartParser(grammar)
