@@ -2,7 +2,7 @@ import nltk
 import sys
 
 FILE_MATCHES = 1
-SENTENCE_MATCHES = 1
+SENTENCE_MATCHES = 5
 
 
 def main():
@@ -13,10 +13,10 @@ def main():
 
     # Calculate IDF values across files
     files = load_files(sys.argv[1])
-    file_words = {
-        filename: tokenize(files[filename])
-        for filename in files
-    }
+    
+    print(f"# of files: {len(files)}") 
+    file_words = {filename: tokenize(files[filename]) for filename in files}
+    
     file_idfs = compute_idfs(file_words)
     
     # print out the word with the highest idf
@@ -32,8 +32,8 @@ def main():
     # Extract sentences from top files
     sentences = dict()
     for filename in filenames:
-        for passage in files[filename].split("\n"):
-            for sentence in nltk.sent_tokenize(passage):
+        for passage in files[filename].split("\n"):  # loop through each passage in the file  
+            for sentence in nltk.sent_tokenize(passage): # its removing the 'l' from 'level' -> evel
                 tokens = tokenize(sentence)
                 if tokens:
                     sentences[sentence] = tokens
@@ -44,6 +44,7 @@ def main():
     # Determine top sentence matches
     matches = top_sentences(query, sentences, idfs, n=SENTENCE_MATCHES)
     for match in matches:
+        print()
         print(match)
 
 # Cache load_files and tokenize
@@ -58,6 +59,11 @@ def load_files(directory):
     import glob
     import os
     import codecs
+    import nltk
+    # 
+
+    # punkt
+    nltk.download('punkt')
     # Get all files in directory using os.sep
     
     file_paths = glob.glob(os.path.join(directory, '*.txt'))
@@ -82,23 +88,26 @@ def tokenize(document):
     """
     from nltk.corpus import stopwords
     from nltk.tokenize import word_tokenize
-    # Download stopwords if necessary
-    nltk.download("stopwords", quiet=True)
+    import nltk
+
+    @functools.lru_cache(maxsize=None)
+    def download_stopwords():
+        nltk.download("stopwords", quiet=True)
+    download_stopwords()
     
     tokens = word_tokenize(document)
     
     # Filter out stopwords
     tokens = [token for token in tokens if not token in stopwords.words('english')]
     
-    # Filter out punctuation
-    
-    tokens = [token for token in tokens if token.isalpha()]
+    # Filter out punctuation adn lowercase
+    tokens = [token.lower() for token in tokens if token.isalpha()]
 
     
     return tokens
 
 
-def compute_idfs(documents):
+def comput_idefs(documents):
     """
     Given a dictionary of `documents` that maps names of documents to a list
     of words, return a dictionary that maps words to their IDF values.
@@ -146,15 +155,15 @@ def top_files(query, files, idfs, n):
     scores = {}
     
     # Calculate the tf-idf score for each file
-    for filename, words in files.items():
+    for filename, words in files.items():  # for each file in the corpus and its words
         tf_idf = 0
-        for word in query:
-            if word in words: # if the word is in the article
+        for word in query:  # e.g. "python"
+            if word in words: # if the word is in the article (python is not in the probability, or neural network articles)
                 # Term frequency is the number of times the word appears in the article
                 tf = words.count(word)
                 idf = idfs[word]
                 tf_idf += tf * idf
-        scores[filename] = tf_idf
+        scores[filename] = tf_idf  # finished checking query in first two file
     
     # Return a list of the filenames of the top n files, ranked by their tf-idf scores
     return sorted(scores, key=scores.get, reverse=True)[:n]
