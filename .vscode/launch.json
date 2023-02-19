@@ -10,8 +10,8 @@
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal",
-            "justMyCode": false,
-            "args": ["sentences/10.txt"],
+            "justMyCode": true,
+            "args": ["corpus"],
 
         }
     ]
