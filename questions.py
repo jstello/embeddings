@@ -18,6 +18,10 @@ def main():
         for filename in files
     }
     file_idfs = compute_idfs(file_words)
+    
+    # print out the word with the highest idf
+    
+    # idf_max = max(file_idfs, key=file_idfs.get)
 
     # Prompt user for query
     query = set(tokenize(input("Query: ")))
@@ -42,13 +46,30 @@ def main():
     for match in matches:
         print(match)
 
-
+# Cache load_files and tokenize
+import functools
+@functools.lru_cache(maxsize=None)
 def load_files(directory):
     """
     Given a directory name, return a dictionary mapping the filename of each
     `.txt` file inside that directory to the file's contents as a string.
     """
-    raise NotImplementedError
+    
+    import glob
+    import os
+    import codecs
+    # Get all files in directory using os.sep
+    
+    file_paths = glob.glob(os.path.join(directory, '*.txt'))
+    files_dict = {}
+    for file_path in file_paths:
+        with open(file_path, 'r', encoding='UTF-8') as file:
+            # the key should be just the file name, not the path
+            key = os.path.basename(file_path)
+            print(f"key: {key}")
+            files_dict[key] = file.read()
+    
+    return files_dict
 
 
 def tokenize(document):
@@ -59,7 +80,22 @@ def tokenize(document):
     Process document by coverting all words to lowercase, and removing any
     punctuation or English stopwords.
     """
-    raise NotImplementedError
+    from nltk.corpus import stopwords
+    from nltk.tokenize import word_tokenize
+    # Download stopwords if necessary
+    nltk.download("stopwords", quiet=True)
+    
+    tokens = word_tokenize(document)
+    
+    # Filter out stopwords
+    tokens = [token for token in tokens if not token in stopwords.words('english')]
+    
+    # Filter out punctuation
+    
+    tokens = [token for token in tokens if token.isalpha()]
+
+    
+    return tokens
 
 
 def compute_idfs(documents):
@@ -70,7 +106,32 @@ def compute_idfs(documents):
     Any word that appears in at least one of the documents should be in the
     resulting dictionary.
     """
-    raise NotImplementedError
+    
+    idf_dict = {}
+    
+    # Inverse document frequency is the log of the number of documents 
+    # divided by the number of documents that contain the word
+    
+    import numpy as np
+    
+    num_docs = len(documents)
+     
+    # create set of all words in all documents
+    
+    words = set()
+    
+    for doc in documents:
+        words.update(documents[doc])
+        
+    for word in words:
+        num_docs_with_word = 0
+        for doc in documents:
+            if word in documents[doc]:
+                num_docs_with_word += 1
+        idf_dict[word] = np.log(num_docs / num_docs_with_word)
+    
+      
+    return idf_dict
 
 
 def top_files(query, files, idfs, n):
@@ -80,18 +141,42 @@ def top_files(query, files, idfs, n):
     to their IDF values), return a list of the filenames of the the `n` top
     files that match the query, ranked according to tf-idf.
     """
-    raise NotImplementedError
+    
+    # Create a dictionary to store the tf-idf scores of each file
+    scores = {}
+    
+    # Calculate the tf-idf score for each file
+    for filename, words in files.items():
+        tf_idf = 0
+        for word in query:
+            if word in words: # if the word is in the article
+                # Term frequency is the number of times the word appears in the article
+                tf = words.count(word)
+                idf = idfs[word]
+                tf_idf += tf * idf
+        scores[filename] = tf_idf
+    
+    # Return a list of the filenames of the top n files, ranked by their tf-idf scores
+    return sorted(scores, key=scores.get, reverse=True)[:n]
 
 
 def top_sentences(query, sentences, idfs, n):
-    """
-    Given a `query` (a set of words), `sentences` (a dictionary mapping
-    sentences to a list of their words), and `idfs` (a dictionary mapping words
-    to their IDF values), return a list of the `n` top sentences that match
-    the query, ranked according to idf. If there are ties, preference should
-    be given to sentences that have a higher query term density.
-    """
-    raise NotImplementedError
+    # Create a dictionary to store the idf and query term density of each sentence
+    scores = {}
+    
+    # Calculate the idf and query term density for each sentence
+    for sentence, words in sentences.items():
+        idf = 0
+        qtd = 0
+        for word in query:
+            if word in words:
+                idf += idfs[word]
+                qtd += 1 / len(words)
+        scores[sentence] = (idf, qtd)
+    
+    # Return a list of the top n sentences, ranked by idf and then by query term density
+    return sorted(scores, key=lambda x: (scores[x][0], scores[x][1]), reverse=True)[:n]
+
 
 
 if __name__ == "__main__":
