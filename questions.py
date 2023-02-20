@@ -14,15 +14,10 @@ def main():
     # Calculate IDF values across files
     files = load_files(sys.argv[1])
     
-    print(f"# of files: {len(files)}") 
     file_words = {filename: tokenize(files[filename]) for filename in files}
     
     file_idfs = compute_idfs(file_words)
     
-    # print out the word with the highest idf
-    
-    # idf_max = max(file_idfs, key=file_idfs.get)
-
     # Prompt user for query
     query = set(tokenize(input("Query: ")))
 
@@ -37,6 +32,7 @@ def main():
                 tokens = tokenize(sentence)
                 if tokens:
                     sentences[sentence] = tokens
+        print(f"Top file matches: {filenames}")
 
     # Compute IDF values across sentences
     idfs = compute_idfs(sentences)
@@ -72,7 +68,6 @@ def load_files(directory):
         with open(file_path, 'r', encoding='UTF-8') as file:
             # the key should be just the file name, not the path
             key = os.path.basename(file_path)
-            print(f"key: {key}")
             files_dict[key] = file.read()
     
     return files_dict
@@ -107,7 +102,7 @@ def tokenize(document):
     return tokens
 
 
-def comput_idefs(documents):
+def compute_idfs(documents):
     """
     Given a dictionary of `documents` that maps names of documents to a list
     of words, return a dictionary that maps words to their IDF values.
@@ -115,13 +110,14 @@ def comput_idefs(documents):
     Any word that appears in at least one of the documents should be in the
     resulting dictionary.
     """
+    import math
     
     idf_dict = {}
     
     # Inverse document frequency is the log of the number of documents 
     # divided by the number of documents that contain the word
     
-    import numpy as np
+    # import numpy as np
     
     num_docs = len(documents)
      
@@ -137,7 +133,7 @@ def comput_idefs(documents):
         for doc in documents:
             if word in documents[doc]:
                 num_docs_with_word += 1
-        idf_dict[word] = np.log(num_docs / num_docs_with_word)
+        idf_dict[word] = math.log(num_docs / num_docs_with_word)
     
       
     return idf_dict
@@ -166,7 +162,11 @@ def top_files(query, files, idfs, n):
         scores[filename] = tf_idf  # finished checking query in first two file
     
     # Return a list of the filenames of the top n files, ranked by their tf-idf scores
-    return sorted(scores, key=scores.get, reverse=True)[:n]
+    top_files_list = sorted(scores, key=scores.get, reverse=True)[:n]
+    
+    print(f"Top file matches: {top_files_list}"
+          )
+    return top_files_list
 
 
 def top_sentences(query, sentences, idfs, n):
@@ -185,8 +185,6 @@ def top_sentences(query, sentences, idfs, n):
     
     # Return a list of the top n sentences, ranked by idf and then by query term density
     return sorted(scores, key=lambda x: (scores[x][0], scores[x][1]), reverse=True)[:n]
-
-
 
 if __name__ == "__main__":
     main()
