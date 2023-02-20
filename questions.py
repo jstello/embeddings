@@ -2,7 +2,7 @@ import nltk
 import sys
 
 FILE_MATCHES = 1
-SENTENCE_MATCHES = 5
+SENTENCE_MATCHES = 1
 
 
 def main():
@@ -95,7 +95,7 @@ def tokenize(document):
     # Filter out stopwords
     tokens = [token for token in tokens if not token in stopwords.words('english')]
     
-    # Filter out punctuation adn lowercase
+    # Filter out punctuation and lowercase
     tokens = [token.lower() for token in tokens if token.isalpha()]
 
     
